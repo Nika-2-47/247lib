@@ -12,9 +12,15 @@ class Program
     {
         ExcelPackage.License.SetNonCommercialPersonal("test");
 
-        string targetDir = @"G:\\@source\\20_projects\\_tempdata";
+        Console.Write("検索対象ディレクトリを入力してください（例: G:\\@source）: ");
+        string? inputDir = Console.ReadLine();
+        string targetDir = string.IsNullOrWhiteSpace(inputDir) ? @".\\" : inputDir.Trim();
+
+        Console.Write("検索パターン（正規表現）を入力してください（例: .*）: ");
+        string? inputPattern = Console.ReadLine();
+        string searchPattern = string.IsNullOrWhiteSpace(inputPattern) ? ".*" : inputPattern.Trim();
+
         int maxDegreeOfParallelism = 16;
-        string searchPattern = ".*仁.*";
         var regex = new Regex(searchPattern);
         var xlsxQueue = new ConcurrentQueue<string>();
 
@@ -60,7 +66,6 @@ class Program
 
                             if (foundCount > lastFoundCount)
                             {
-                                // 新しいファイルが見つかった場合は全体再描画
                                 Console.Clear();
                                 foreach (var foundFile in foundFiles)
                                 {
@@ -72,7 +77,6 @@ class Program
                             }
                             else
                             {
-                                // 進捗のみ更新
                                 Console.SetCursorPosition(0, progressLine);
                                 Console.Write($"処理済み: {current}/{fileCount} ファイル   ");
                             }
@@ -92,7 +96,6 @@ class Program
         var endTime = DateTime.Now;
         var duration = (endTime - startTime).TotalSeconds;
 
-        // 最終結果を再描画
         lock (consoleLock)
         {
             Console.Clear();
